@@ -1,67 +1,63 @@
-# MH4518: Simulation Techniques for Barrier Reverse Convertibles
+# MH4518: Simulation Techniques in Finance - Barrier Reverse Convertible Analysis
 
-Welcome to our repository dedicated to the simulation and pricing of Barrier Reverse Convertible (BRC) derivatives. Here, we explore various models and methods to price these complex structured products effectively.
+Welcome to our repository dedicated to the simulation and pricing of Barrier Reverse Convertible (BRC) products. Here, we focus on analyzing and modeling the 7% p.a. CHF Barrier Reverse Convertible linked to Roche, Richemont, and Zurich stocks.
 
-## Overview of Barrier Reverse Convertibles
+## Featured Product Analysis
 
-Barrier Reverse Convertibles (BRCs) are structured products that offer a fixed coupon payment and conditional capital protection. Our simulations focus on:
+Our primary focus is on a specific structured product:
 
-1. **Single Asset BRCs**: Linked to one underlying asset.
-2. **Multi-Asset BRCs**: Linked to a basket of underlying assets.
+1. **7% p.a. CHF Barrier Reverse Convertible on Roche, Richemont, Zurich**
+   - Coupon: 7% p.a., paid quarterly
+   - Barrier: 60% of initial fixing, continuously observed
+   - Term: 15 months
+   - Currency: CHF
+   - Issuer: Credit Suisse AG, London Branch
 
-## Key Features Modeled
-
-Our simulations capture the essential features of BRCs:
-
-* Fixed coupon payments
-* Continuous or end-of-term barrier observation
-* Potential for capital loss based on worst-performing asset
+For detailed product specifications, please refer to the product factsheet in the `docs` directory.
 
 ## Modeling and Simulation of Underlying Assets
 
-We incorporate various asset models to ensure robust BRC pricing:
+We implement various models to simulate the behavior of the underlying stocks:
 
-* **Geometric Brownian Motion (GBM)**: The foundational model for asset price simulation.
-* **Heston Stochastic Volatility Model**: Captures dynamic volatility of underlying assets.
-* **Jump-Diffusion Models**: Incorporates sudden price movements.
+* **Geometric Brownian Motion (GBM)**: Basic model for stock price movements
+* **Heston Stochastic Volatility Model**: Captures dynamic volatility of the stocks
+* **Correlation Matrix Estimation**: Models the interdependence between Roche, Richemont, and Zurich stocks
 
-Each model is simulated under various scenarios, considering effects of dividends and correlation between multiple assets.
+## Pricing Methodology
 
-## Pricing Methods
+Our repository includes implementations of various pricing methods:
 
-We utilize several numerical techniques for BRC valuation:
+* **Monte Carlo Simulation**: For path-dependent barrier feature
+* **Finite Difference Method (FDM)**: Solves the multi-dimensional PDE for the BRC
+* **Analytical Approximations**: Quick estimations using closed-form solutions where applicable
 
-* **Monte Carlo Simulation**: For path-dependent barrier features.
-* **Finite Difference Method (FDM)**: To solve partial differential equations for option components.
-* **Analytical Approximations**: For quick pricing under simplified assumptions.
+## Risk Metrics and Sensitivity Analysis
 
-## Sensitivity Analysis and Greeks
+We compute and analyze key risk metrics:
 
-We compute key sensitivities to understand BRC price dynamics:
-
-* **Delta (δ)**: Rate of change in BRC price relative to underlying asset price.
-* **Gamma (Γ)**: Second-order price sensitivity to underlying asset movements.
-* **Vega (ν)**: Sensitivity to volatility changes.
-* **Theta (θ)**: Time decay of the BRC value.
-
-## Risk Assessment
-
-Our models provide comprehensive risk metrics:
-
-* **Value at Risk (VaR)**: Estimating potential losses.
-* **Expected Shortfall**: Assessing tail risk.
-* **Scenario Analysis**: Testing BRC performance under various market conditions.
+* **Greeks**: Delta, Gamma, Vega, Theta for each underlying stock
+* **Barrier Probabilities**: Estimation of barrier hit probabilities
+* **Scenario Analysis**: Product behavior under various market conditions
 
 ## Data Analysis and Backtesting
 
-We focus on empirical testing and validation:
+Our analysis includes:
 
-* **Historical Simulation**: Backtesting BRC performance using historical data.
-* **Stress Testing**: Evaluating BRC behavior under extreme market scenarios.
+* **Historical Data Analysis**: Performance of Roche, Richemont, and Zurich stocks
+* **Backtesting**: Simulating historical performance of similar BRC products
+* **Dividend Modeling**: Incorporating historical and projected dividends
+
+## Visualization Tools
+
+We provide tools for visualizing:
+
+* **Payoff Diagrams**: Interactive plots showing product payoff at maturity
+* **Stock Price Simulations**: Visual representation of Monte Carlo paths
+* **Sensitivity Surfaces**: 3D plots of product value against various parameters
 
 ## Contributing
 
-We welcome contributions that enhance our BRC simulations or introduce new relevant models. Please refer to our contribution guidelines for more information.
+We welcome contributions that enhance our BRC analysis or introduce new relevant models. Please refer to our contribution guidelines for more information.
 
 ## License
 
