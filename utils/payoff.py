@@ -45,7 +45,9 @@ def payoff_func(
             break
     print(f'Barrier event reached: {barrier}')
     
-    above_initial = (path_rog[-1]>=price_rog) + (path_cfr[-1]>=price_cfr) + (path_zurn[-1]>=price_zurn)
+    above_initial = int((path_rog[-1] >= price_rog)) + \
+                    int((path_cfr[-1] >= price_cfr)) + \
+                    int((path_zurn[-1] >= price_zurn))
     print(f'Close above initial: {above_initial}')
 
     if (barrier==False) or (barrier==True and above_initial==3):
