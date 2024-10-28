@@ -11,9 +11,9 @@ def payoff_func(
         price_zurn=412.30
         ):
     print('Hello')
-    print(f'Path ROG: {path_rog}')
-    print(f'Path CFR: {path_cfr}')
-    print(f'Path ZURN: {path_zurn}')
+    # print(f'Path ROG: {path_rog}')
+    # print(f'Path CFR: {path_cfr}')
+    # print(f'Path ZURN: {path_zurn}')
 
     coupon_payoff = denomination * coupon
 
