@@ -17,3 +17,9 @@ Barrier level: 60%
 | 11/06/2024 |
 | 11/09/2024 |
 | 11/12/2024 |
+
+
+Data Description
+1. Last price for each stock prices up to 25/10/2024
+2. Implied volatility for each stock prices up to 24/10/2024
+3. Risk free rate, which is CHF 1Y Mid Yield from 25/10/2023 to 24/10/2024
