@@ -8,7 +8,8 @@ def payoff_func(
         coupon=0.0875, 
         price_rog=257.65, 
         price_cfr=125.60, 
-        price_zurn=412.30
+        price_zurn=412.30,
+        verbose=True
         ):
     print('Hello')
     # print(f'Path ROG: {path_rog}')
@@ -25,7 +26,9 @@ def payoff_func(
     performance_cfr = path_cfr[-1] / price_cfr
     performance_zurn = path_zurn[-1] / price_zurn
     worst_performance = min(performance_rog, performance_cfr, performance_zurn)
-    print(f'Worst performance: {worst_performance}')
+
+    if verbose:
+        print(f'Worst performance: {worst_performance}')
 
     barrier = False
 
@@ -43,12 +46,15 @@ def payoff_func(
         if element <= barrier_zurn:
             barrier = True
             break
-    print(f'Barrier event reached: {barrier}')
+     
+    if verbose:
+        print(f'Barrier event reached: {barrier}')
     
     above_initial = int((path_rog[-1] >= price_rog)) + \
                     int((path_cfr[-1] >= price_cfr)) + \
                     int((path_zurn[-1] >= price_zurn))
-    print(f'Close above initial: {above_initial}')
+    if verbose:
+        print(f'Close above initial: {above_initial}')
 
     if (barrier==False) or (barrier==True and above_initial==3):
         denomination_payoff = denomination
