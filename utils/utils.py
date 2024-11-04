@@ -13,7 +13,7 @@ def payoff_func(
         price_zurn=412.30,
         verbose=True
         ):
-    print('Hello')
+    # print('Hello')
     # print(f'Path ROG: {path_rog}')
     # print(f'Path CFR: {path_cfr}')
     # print(f'Path ZURN: {path_zurn}')
@@ -121,8 +121,8 @@ def retrieve_data(
     # Show the combined DataFrame
     return combined_df
 
-sample_mean = 100
-days_count = 30
-risk_free = 0.01
+# sample_mean = 100
+# days_count = 30
+# risk_free = 0.01
 
-print(neutral_pricing(sample_mean, risk_free, days_count))
+# print(neutral_pricing(sample_mean, risk_free, days_count))
