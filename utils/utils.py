@@ -1,5 +1,7 @@
 import random
+import numpy as np
 import pandas as pd
+
 def payoff_func(
         path_rog, 
         path_cfr, 
@@ -66,9 +68,18 @@ def payoff_func(
     total_payoff = coupon_payoff + denomination_payoff
     return total_payoff
 
+def neutral_pricing(
+    sample_mean, 
+    risk_free,
+    days_count
+    ):
+    discounted_mean = np.exp(-risk_free * days_count / 252) * sample_mean
+    return discounted_mean
 
-def retrieve_data(start_date = '2023-10-25',
-                  end_date = '2024-10-25'):
+def retrieve_data(
+    start_date = '2023-10-25',
+    end_date = '2024-10-25'
+    ):
     # List of tickers
     tickers = ['rog', 'cfr', 'zurn']
 
@@ -109,3 +120,9 @@ def retrieve_data(start_date = '2023-10-25',
 
     # Show the combined DataFrame
     return combined_df
+
+sample_mean = 100
+days_count = 30
+risk_free = 0.01
+
+print(neutral_pricing(sample_mean, risk_free, days_count))
