@@ -1,6 +1,7 @@
 import random
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 
 def payoff_func(
         path_rog, 
@@ -86,6 +87,8 @@ def neutral_pricing(
     days_count
     ):
     discounted_mean = np.exp(-risk_free * days_count / 252) * sample_mean
+    print(discounted_mean)
+
     return discounted_mean
 
 def retrieve_data(
@@ -133,6 +136,32 @@ def retrieve_data(
     # Show the combined DataFrame
     return combined_df
 
+def evaluation_plot(
+    backtest_start,
+    backtest_end,
+    combined_df,
+    prices
+):
+    real_price = pd.read_csv('../data/product_price.csv')
+    real_price['Date'] = pd.to_datetime(real_price['Date'], dayfirst=True)
+    real_price = real_price.sort_values(by='Date', ascending=True)
+    real_price['Product'] = 1000 * real_price['Product']
+
+    actual = real_price[(real_price['Date'] >= combined_df.iloc[backtest_start]['Date']) & (real_price['Date'] <= combined_df.iloc[backtest_end - 1]['Date'])]['Product'].values
+    dates = real_price[(real_price['Date'] >= combined_df.iloc[backtest_start]['Date']) & (real_price['Date'] <= combined_df.iloc[backtest_end - 1]['Date'])]['Date']
+
+    real_price[(real_price['Date'] >= combined_df.iloc[backtest_start]['Date']) & (real_price['Date'] <= combined_df.iloc[backtest_end - 1]['Date'])]
+
+    plt.figure(figsize=(20, 4))
+    plt.plot(dates, prices, label='Predicted Prices')
+    plt.plot(dates, actual, label='Actual Prices')
+    plt.title('Price Comparison Over Time')
+    plt.xlabel('Date')
+    plt.ylabel('Price')
+    plt.ylim(800, 1200)
+    plt.legend()
+    # plt.show()
+# real_price
 # sample_mean = 100
 # days_count = 30
 # risk_free = 0.01
