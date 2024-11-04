@@ -6,8 +6,9 @@ def payoff_func(
         path_rog, 
         path_cfr, 
         path_zurn,
+        start_date,
         denomination=1000,
-        coupon=0.0875, 
+        # coupon=0.0875, 
         price_rog=257.65, 
         price_cfr=125.60, 
         price_zurn=412.30,
@@ -17,6 +18,17 @@ def payoff_func(
     # print(f'Path ROG: {path_rog}')
     # print(f'Path CFR: {path_cfr}')
     # print(f'Path ZURN: {path_zurn}')
+
+    if start_date <= pd.to_datetime('2023-12-11'):
+        coupon = 0.0875
+    elif start_date <= pd.to_datetime('2024-03-11'):
+        coupon = 0.0700
+    elif start_date <= pd.to_datetime('2024-06-11'):
+        coupon = 0.0525
+    elif start_date <= pd.to_datetime('2024-09-11'):
+        coupon = 0.0350
+    elif start_date <= pd.to_datetime('2024-12-11'):
+        coupon = 0.0175
 
     coupon_payoff = denomination * coupon
 
