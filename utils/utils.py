@@ -8,6 +8,7 @@ def payoff_func(
         path_cfr, 
         path_zurn,
         start_date,
+        risk_free,
         denomination=1000,
         # coupon=0.0875, 
         price_rog=257.65, 
@@ -15,24 +16,7 @@ def payoff_func(
         price_zurn=412.30,
         verbose=True
         ):
-    # print('Hello')
-    # print(f'Path ROG: {path_rog}')
-    # print(f'Path CFR: {path_cfr}')
-    # print(f'Path ZURN: {path_zurn}')
-
-    if start_date <= pd.to_datetime('2023-12-11'):
-        coupon = 0.0875
-    elif start_date <= pd.to_datetime('2024-03-11'):
-        coupon = 0.0700
-    elif start_date <= pd.to_datetime('2024-06-11'):
-        coupon = 0.0525
-    elif start_date <= pd.to_datetime('2024-09-11'):
-        coupon = 0.0350
-    elif start_date <= pd.to_datetime('2024-12-11'):
-        coupon = 0.0175
-
-    coupon_payoff = denomination * coupon
-
+    
     barrier_rog = price_rog * 0.6
     barrier_cfr = price_cfr * 0.6
     barrier_zurn = price_zurn * 0.6
@@ -78,7 +62,21 @@ def payoff_func(
     elif path_rog[-1]==0 or path_cfr[-1]==0 or path_zurn[-1]==0:
         denomination_payoff = 0
 
-    total_payoff = coupon_payoff + denomination_payoff
+    # total_payoff = coupon_payoff + denomination_payoff
+    # denomination_payoff = 1000
+
+    coupon = 0.0175
+
+    payment_dates = pd.to_datetime(['2023-12-11', '2024-03-11', '2024-06-11', '2024-09-11', '2024-12-11', '2024-12-11'])
+    payment_amount = [1000 * coupon, 1000 * coupon, 1000 * coupon, 1000 * coupon, 1000 * coupon] + [denomination_payoff] 
+    days_count = [element.days for element in (payment_dates - pd.to_datetime(start_date))]
+    indicator_vars = (payment_dates >= pd.to_datetime(start_date))
+
+    total_payoff = 0
+    for amt, cnt, var in zip(payment_amount, days_count, indicator_vars):
+        total_payoff += np.exp(-risk_free * cnt / 252) * amt * var
+
+    # print(total_payoff)
     return total_payoff
 
 def neutral_pricing(
@@ -153,17 +151,12 @@ def evaluation_plot(
     real_price[(real_price['Date'] >= combined_df.iloc[backtest_start]['Date']) & (real_price['Date'] <= combined_df.iloc[backtest_end - 1]['Date'])]
 
     plt.figure(figsize=(20, 4))
-    plt.plot(dates, prices, label='Predicted Prices')
-    plt.plot(dates, actual, label='Actual Prices')
+    plt.plot(dates, prices, marker='o', label='Predicted Prices')
+    plt.plot(dates, actual, marker='o', label='Actual Prices')
     plt.title('Price Comparison Over Time')
     plt.xlabel('Date')
     plt.ylabel('Price')
-    plt.ylim(800, 1200)
+    plt.ylim(900, 1100)
     plt.legend()
     # plt.show()
-# real_price
-# sample_mean = 100
-# days_count = 30
-# risk_free = 0.01
 
-# print(neutral_pricing(sample_mean, risk_free, days_count))
