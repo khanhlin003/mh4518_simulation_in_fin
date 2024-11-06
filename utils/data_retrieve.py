@@ -2,6 +2,8 @@ import random
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+from scipy.interpolate import CubicSpline
+
 
 def retrieve_data(
     start_date = '2023-10-25',
@@ -47,3 +49,35 @@ def retrieve_data(
 
     # Show the combined DataFrame
     return combined_df
+
+
+def retrieve_bond():
+
+    df_dict = dict()
+    df_dict['df_1w'] = pd.read_csv('../data/bond/Switzerland 1-Week Bond Yield Historical Data.csv')[['Date', 'Price']]
+    df_dict['df_1m'] = pd.read_csv('../data/bond/Switzerland 1-Month Bond Yield Historical Data.csv')[['Date', 'Price']]
+    df_dict['df_2m'] = pd.read_csv('../data/bond/Switzerland 2-Month Bond Yield Historical Data.csv')[['Date', 'Price']]
+    df_dict['df_3m'] = pd.read_csv('../data/bond/Switzerland 3-Month Bond Yield Historical Data.csv')[['Date', 'Price']]
+    df_dict['df_6m'] = pd.read_csv('../data/bond/Switzerland 6-Month Bond Yield Historical Data.csv')[['Date', 'Price']]
+    df_dict['df_1y'] = pd.read_csv('../data/bond/Switzerland 1-Year Bond Yield Historical Data-3.csv')[['Date', 'Price']]
+    df_dict['df_2y'] = pd.read_csv('../data/bond/Switzerland 2-Year Bond Yield Historical Data.csv')[['Date', 'Price']]
+
+    for key in df_dict:
+        df_dict[key]['Price'] = df_dict[key]['Price'].astype(float)
+        df_dict[key]['Date'] = pd.to_datetime(df_dict[key]['Date'])
+        df_dict[key].columns = ['Date', key]
+
+    df = df_dict['df_1w']
+    for key in list(df_dict.keys())[1:]:
+        df = pd.merge(df, df_dict[key], on='Date')
+
+    return df
+
+def interpolate_rate(df, date, j):
+    df_filter = df[df['Date']==date].drop(columns='Date')
+    x = [1/52, 1/12, 2/12, 3/12, 6/12, 1, 2]
+    y = df_filter.values.flatten()
+
+    spline = CubicSpline(x, y)
+
+    return (spline(j/252) / spline((j+1)/252) - 1)
