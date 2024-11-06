@@ -79,16 +79,6 @@ def payoff_func(
     # print(total_payoff)
     return total_payoff
 
-def neutral_pricing(
-    sample_mean, 
-    risk_free,
-    days_count
-    ):
-    discounted_mean = np.exp(-risk_free * days_count / 252) * sample_mean
-    print(discounted_mean)
-
-    return discounted_mean
-
 def retrieve_data(
     start_date = '2023-10-25',
     end_date = '2024-10-25'
