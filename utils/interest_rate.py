@@ -34,9 +34,9 @@ class VasicekModel(object):
         sigma: instantaneous volatility: measures instant by instant the amplitude of randomness
         """
         self.data = data
-        self.a = params.get('speed of reversion') # 0
-        self.b = params.get('long term mean level') # 0.107659718380514
-        self.sigma = params.get('sigma') # 0.106212663278328
+        self.a = params.get('speed of reversion')  
+        self.b = params.get('long term mean level') 
+        self.sigma = params.get('sigma')
         self.maturity_date = params.get('maturity_date')
         self.dt = 1/252
     
