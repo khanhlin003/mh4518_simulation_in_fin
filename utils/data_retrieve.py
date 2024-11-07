@@ -73,11 +73,15 @@ def retrieve_bond():
 
     return df
 
-def interpolate_rate(df, date, j):
+def interpolate_rate(df, date):
     df_filter = df[df['Date']==date].drop(columns='Date')
     x = [1/52, 1/12, 2/12, 3/12, 6/12, 1, 2]
     y = df_filter.values.flatten()
 
     spline = CubicSpline(x, y)
 
-    return (spline(j/252) / spline((j+1)/252) - 1)
+    return spline
+
+# df = retrieve_bond()
+# spline = interpolate_rate(df, '2024-01-11')
+# print(term_structure(spline, 10))
