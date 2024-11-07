@@ -14,6 +14,7 @@ def payoff_func(
         price_rog=257.65, 
         price_cfr=125.60, 
         price_zurn=412.30,
+        risk_neutral=True,
         verbose=True
         ):
     
@@ -68,14 +69,22 @@ def payoff_func(
     coupon = 0.0175
 
     payment_dates = pd.to_datetime(['2023-12-11', '2024-03-11', '2024-06-11', '2024-09-11', '2024-12-11', '2024-12-11'])
+    days_count = [len(pd.bdate_range(start=start_date, end=element)) for element in payment_dates]
+    # print(payment_id)
+
     payment_amount = [1000 * coupon, 1000 * coupon, 1000 * coupon, 1000 * coupon, 1000 * coupon] + [denomination_payoff] 
-    days_count = [element.days for element in (payment_dates - pd.to_datetime(start_date))]
+    # days_count = [element.days for element in (payment_dates - pd.to_datetime(start_date))]
+    # print(f'Payoff days: {days_count}')
     indicator_vars = (payment_dates >= pd.to_datetime(start_date))
 
-    total_payoff = 0
-    for amt, cnt, var in zip(payment_amount, days_count, indicator_vars):
-        total_payoff += np.exp(-risk_free * cnt / 252) * amt * var
-
+    if risk_neutral:
+        total_payoff = 0
+        for amt, cnt, var in zip(payment_amount, days_count, indicator_vars):
+            total_payoff += np.exp(-risk_free * cnt / 252) * amt * var
+    else:
+        total_payoff = 0
+        for amt, cnt, var, ir in zip(payment_amount, days_count, indicator_vars, risk_free):
+            total_payoff +=  amt / ir * var
     # print(total_payoff)
     return total_payoff
 
@@ -150,3 +159,16 @@ def evaluation_plot(
     plt.legend()
     # plt.show()
 
+# payoff_func(
+#         path_rog=None, 
+#         path_cfr=None, 
+#         path_zurn=None,
+#         start_date='2024-07-25',
+#         risk_free=[1, 1, 1, 1, 1, 1.25],
+#         denomination=1000,
+#         price_rog=257.65, 
+#         price_cfr=125.60, 
+#         price_zurn=412.30,
+#         risk_neutral=False,
+#         verbose=True
+#         )

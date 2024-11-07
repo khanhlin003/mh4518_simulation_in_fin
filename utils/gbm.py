@@ -150,14 +150,24 @@ def MultivariateGBMSimulationTS(
 
     volatility=log_returns.iloc[(current_id - window_size):current_id, :].cov() * n_days   
     T = dt * (last_id - current_id)
+    print(f'GBM days: {last_id - current_id}')
+
     n_steps = int(T / dt)
     result = np.zeros((len(tickers), n_paths, n_steps))
     np.random.seed(42)
 
     if term_structure:
         date_str = combined_df['Date'].iloc[current_id]
-        spline = interpolate_rate(df_bond, date_str)
+        payment_dates = pd.to_datetime(['2023-12-11', '2024-03-11', '2024-06-11', '2024-09-11', '2024-12-11', '2024-12-11'])
+        # days_count = [element.days for element in (payment_dates - pd.to_datetime(date_str))]
         
+        days_count = [len(pd.bdate_range(start=pd.to_datetime(date_str), end=element)) for element in payment_dates]
+        print(days_count)
+
+        spline = interpolate_rate(df_bond, date_str)
+        discounts = [spline(element/252) for element in days_count]
+        print(days_count[-1])
+
         for i in tqdm(range(n_paths)):
             choleskyMatrix = np.linalg.cholesky(volatility)
             e = np.random.normal(size=(len(tickers), n_steps)) # Generate RV for steps
@@ -180,7 +190,7 @@ def MultivariateGBMSimulationTS(
                             result[k, i, j] = result[k, i, j-1] * drift * np.exp(
                                 (- 1/2 * np.sqrt(volatility.iloc[k, k])) * dt + 
                                 np.sqrt(dt) * choleskyMatrix[k, k] * e[k, j])
-        print(spline(T/252))
-        return result, tickers
+        print(spline(T))
+        return result, tickers, discounts
 
-# MultivariateGBMSimulationEMS(s0=close.iloc[187], n_paths=100, current_id=187, window_size=30)
+# MultivariateGBMSimulationTS(s0=close.iloc[187], n_paths=100, current_id=187, window_size=30)

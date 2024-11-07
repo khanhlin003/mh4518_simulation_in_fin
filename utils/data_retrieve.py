@@ -2,7 +2,7 @@ import random
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from scipy.interpolate import CubicSpline
+from scipy.interpolate import CubicSpline, UnivariateSpline
 
 
 def retrieve_data(
@@ -78,7 +78,8 @@ def interpolate_rate(df, date):
     x = [1/52, 1/12, 2/12, 3/12, 6/12, 1, 2]
     y = df_filter.values.flatten()
 
-    spline = CubicSpline(x, y)
+    # spline = CubicSpline(x, y)
+    spline = UnivariateSpline(x, y, s=1)
 
     return spline
 
