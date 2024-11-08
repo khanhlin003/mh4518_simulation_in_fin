@@ -139,7 +139,7 @@ def evaluation_plot(
     combined_df,
     prices
 ):
-    real_price = pd.read_csv('../data/product_price.csv')
+    real_price = pd.read_csv('../data/product_price_full.csv')
     real_price['Date'] = pd.to_datetime(real_price['Date'], dayfirst=True)
     real_price = real_price.sort_values(by='Date', ascending=True)
     real_price['Product'] = 1000 * real_price['Product']
@@ -150,12 +150,14 @@ def evaluation_plot(
     real_price[(real_price['Date'] >= combined_df.iloc[backtest_start]['Date']) & (real_price['Date'] <= combined_df.iloc[backtest_end - 1]['Date'])]
 
     plt.figure(figsize=(20, 4))
-    plt.plot(dates, prices, marker='o', label='Predicted Prices')
+    for i in range(len(prices)):
+        plt.plot(dates, prices[i], marker='o', label=f'Predicted Prices {i}')
+
     plt.plot(dates, actual, marker='o', label='Actual Prices')
     plt.title('Price Comparison Over Time')
     plt.xlabel('Date')
     plt.ylabel('Price')
-    plt.ylim(900, 1100)
+    plt.ylim(850, 1150)
     plt.legend()
     # plt.show()
 
