@@ -54,32 +54,60 @@ def retrieve_data(
 def retrieve_bond():
 
     df_dict = dict()
-    df_dict['df_1w'] = pd.read_csv('../data/bond/Switzerland 1-Week Bond Yield Historical Data.csv')[['Date', 'Price']]
-    df_dict['df_1m'] = pd.read_csv('../data/bond/Switzerland 1-Month Bond Yield Historical Data.csv')[['Date', 'Price']]
-    df_dict['df_2m'] = pd.read_csv('../data/bond/Switzerland 2-Month Bond Yield Historical Data.csv')[['Date', 'Price']]
-    df_dict['df_3m'] = pd.read_csv('../data/bond/Switzerland 3-Month Bond Yield Historical Data.csv')[['Date', 'Price']]
-    df_dict['df_6m'] = pd.read_csv('../data/bond/Switzerland 6-Month Bond Yield Historical Data.csv')[['Date', 'Price']]
-    df_dict['df_1y'] = pd.read_csv('../data/bond/Switzerland 1-Year Bond Yield Historical Data-3.csv')[['Date', 'Price']]
-    df_dict['df_2y'] = pd.read_csv('../data/bond/Switzerland 2-Year Bond Yield Historical Data.csv')[['Date', 'Price']]
+    # sample_df = pd.DataFrame({
+    #     'Date': pd.read_csv('../data/bond/bond_1Y.csv')['Date']
+    # })
+    # df_3m, df_6m = sample_df.copy(), sample_df.copy()
+    # df_3m['Last Price'] = 100.4
+    # df_6m['Last Price'] = 100.5
+
+    # df_dict['df_3m'] = df_3m
+    # df_dict['df_6m'] = df_6m
+    df_dict['df_1y'] = pd.read_csv('../data/bond/bond_1Y.csv')[['Date', 'Last Price']]
+    df_dict['df_2y'] = pd.read_csv('../data/bond/bond_2Y.csv')[['Date', 'Last Price']]
+    df_dict['df_3y'] = pd.read_csv('../data/bond/bond_3Y.csv')[['Date', 'Last Price']]
+    df_dict['df_4y'] = pd.read_csv('../data/bond/bond_4Y.csv')[['Date', 'Last Price']]
+    df_dict['df_5y'] = pd.read_csv('../data/bond/bond_5Y.csv')[['Date', 'Last Price']]
+    df_dict['df_6y'] = pd.read_csv('../data/bond/bond_6Y.csv')[['Date', 'Last Price']]
+    df_dict['df_8y'] = pd.read_csv('../data/bond/bond_8Y.csv')[['Date', 'Last Price']]
+    df_dict['df_10y'] = pd.read_csv('../data/bond/bond_10Y.csv')[['Date', 'Last Price']]
 
     for key in df_dict:
-        df_dict[key]['Price'] = df_dict[key]['Price'].astype(float)
+        df_dict[key]['Last Price'] = df_dict[key]['Last Price'].astype(float) / 100
         df_dict[key]['Date'] = pd.to_datetime(df_dict[key]['Date'])
         df_dict[key].columns = ['Date', key]
 
-    df = df_dict['df_1w']
+    df = df_dict['df_1y']
     for key in list(df_dict.keys())[1:]:
         df = pd.merge(df, df_dict[key], on='Date')
 
     return df
 
+def retrieve_vol():
+    df_dict = dict()
+    for tickers in ['rog', 'cfr', 'zurn']:
+
+        df_dict[tickers] = pd.read_csv(f'../data/{tickers}_ivol.csv')
+        df_dict[tickers].columns = ['Date', tickers]
+        df_dict[tickers][tickers] = df_dict[tickers][tickers].bfill()
+
+    df = pd.DataFrame({
+        'Date': df_dict[tickers]['Date']
+    })
+    for tickers in df_dict:
+        df = pd.merge(df, df_dict[tickers], on='Date')
+        df.sort_values(by='Date', inplace=True)
+    
+    return df
+
 def interpolate_rate(df, date):
     df_filter = df[df['Date']==date].drop(columns='Date')
-    x = [1/52, 1/12, 2/12, 3/12, 6/12, 1, 2]
+    # x = [1/4, 1/2, 1, 2, 3, 4, 5, 6, 8, 10]
+    x = [1, 2, 3, 4, 5, 6, 8, 10]
     y = df_filter.values.flatten()
 
-    # spline = CubicSpline(x, y)
-    spline = UnivariateSpline(x, y, s=1)
+    spline = CubicSpline(x, y)
+    # spline = UnivariateSpline(x, y, s=1.0)
 
     return spline
 
