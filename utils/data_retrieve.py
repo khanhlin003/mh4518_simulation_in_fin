@@ -90,6 +90,7 @@ def retrieve_vol():
         df_dict[tickers] = pd.read_csv(f'../data/{tickers}_ivol.csv')
         df_dict[tickers].columns = ['Date', tickers]
         df_dict[tickers][tickers] = df_dict[tickers][tickers].bfill()
+        df_dict[tickers][tickers] = df_dict[tickers][tickers] / 100
 
     df = pd.DataFrame({
         'Date': df_dict[tickers]['Date']
