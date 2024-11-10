@@ -3,8 +3,12 @@ import typing
 from datetime import date, timedelta, datetime
 import numpy as np
 import pandas as pd
+import os 
 
 def get_period(key: str):
+    """
+    Helper function to convert period strings to fractions of a year.
+    """
     map = {
         '1-Week': 1/52,
         '1-Month': 1/12,
@@ -16,15 +20,18 @@ def get_period(key: str):
     }
     return map[key]
 
-def populate_bond_table(bond_price, today, maturity_date):
-    bond_table = pd.DataFrame(index=pd.date_range(today, maturity_date), columns=['price'])
-    X = [get_period(col) for col in bond_price.columns]
-    Y = bond_price.loc[today].to_list()  
-    for date in bond_table.index:
-        tdelta = (date - today).days/365
-        interpolated_y = np.interp(tdelta,X,Y)
-        bond_table.loc[date]['price'] = interpolated_y
-    return bond_table
+def read_bond_data(data_dir):
+    """
+    Read bond yield data from the provided directory and return a consolidated DataFrame.
+    """
+    bond_data = pd.DataFrame()
+    for filename in os.listdir(data_dir):
+        if filename.endswith('.csv'):
+            df = pd.read_csv(os.path.join(data_dir, filename))
+            period = filename.split(' ')[1]
+            df['period'] = get_period(period)
+            bond_data = pd.concat([bond_data, df], ignore_index=True)
+    return bond_data
 
 class VasicekModel(object):
     def __init__(self, data: pd.DataFrame, params: typing.Dict):
@@ -34,8 +41,8 @@ class VasicekModel(object):
         sigma: instantaneous volatility: measures instant by instant the amplitude of randomness
         """
         self.data = data
-        self.a = params.get('speed of reversion')  
-        self.b = params.get('long term mean level') 
+        self.a = params.get('speed of reversion')   
+        self.b = params.get('long term mean level')
         self.sigma = params.get('sigma')
         self.maturity_date = params.get('maturity_date')
         self.dt = 1/252
