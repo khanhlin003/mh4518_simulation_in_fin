@@ -26,7 +26,7 @@ def MultivariateGBMSimulation(
     window_size=30,
     implied_volatility=False
 ):
-    volatility=log_returns.iloc[(current_id - window_size):current_id, :].cov() * n_days   
+    volatility=log_returns.iloc[(current_id - window_size):current_id, :].cov() * n_days 
     corr_matrix = log_returns.iloc[(current_id - window_size):current_id, :].corr()
 
     if implied_volatility:
@@ -52,11 +52,11 @@ def MultivariateGBMSimulation(
                     else:
                         if isinstance(drift, np.ndarray):
                             result[k, i, j] = result[k, i, j-1] * np.exp(
-                                (drift[j] -  1/2 * np.sqrt(volatility.iloc[k, k])) * dt + 
+                                (drift[j] -  1/2 * volatility.iloc[k, k]) * dt + 
                                 np.sqrt(dt) * choleskyMatrix[k, k] * e[k, j]) 
                         else:
                             result[k, i, j] = result[k, i, j-1] * np.exp(
-                                (drift -  1/2 * np.sqrt(volatility.iloc[k, k])) * dt + 
+                                (drift -  1/2 * volatility.iloc[k, k]) * dt + 
                                 np.sqrt(dt) * choleskyMatrix[k, k] * e[k, j])
     print('Hello')
     return result, tickers
@@ -73,7 +73,7 @@ def MultivariateGBMSimulationAV(
     window_size=30,
     implied_volatility=False
 ):
-    volatility=log_returns.iloc[(current_id - window_size):current_id, :].cov() * n_days   
+    volatility=log_returns.iloc[(current_id - window_size):current_id, :].cov() * n_days 
     corr_matrix = log_returns.iloc[(current_id - window_size):current_id, :].corr()
 
     if implied_volatility:
@@ -102,17 +102,17 @@ def MultivariateGBMSimulationAV(
                 else:
                     if isinstance(drift, np.ndarray):
                         result[k, i, j] = result[k, i, j-1] * np.exp(
-                            (drift[j] -  1/2 * np.sqrt(volatility.iloc[k, k])) * dt + 
+                            (drift[j] -  1/2 * volatility.iloc[k, k]) * dt + 
                             np.sqrt(dt) * choleskyMatrix[k, k] * e[k, j])
                         result[k, n_paths - i - 1, j] = result[k, n_paths - i - 1, j-1] * np.exp(
-                            (drift[j] -  1/2 * np.sqrt(volatility.iloc[k, k])) * dt + 
+                            (drift[j] -  1/2 * volatility.iloc[k, k]) * dt + 
                             np.sqrt(dt) * choleskyMatrix[k, k] * e_tilde[k, j])
                     else:
                         result[k, i, j] = result[k, i, j-1] * np.exp(
-                            (drift -  1/2 * np.sqrt(volatility.iloc[k, k])) * dt + 
+                            (drift -  1/2 * volatility.iloc[k, k]) * dt + 
                             np.sqrt(dt) * choleskyMatrix[k, k] * e[k, j])
                         result[k, n_paths - i - 1, j] = result[k, n_paths - i - 1, j-1] * np.exp(
-                            (drift -  1/2 * np.sqrt(volatility.iloc[k, k])) * dt + 
+                            (drift -  1/2 * volatility.iloc[k, k]) * dt + 
                             np.sqrt(dt) * choleskyMatrix[k, k] * e_tilde[k, j])
     return result, tickers
 
@@ -128,7 +128,7 @@ def MultivariateGBMSimulationEMS(
     window_size=30,
     implied_volatility=False
 ):
-    volatility=log_returns.iloc[(current_id - window_size):current_id, :].cov() * n_days   
+    volatility=log_returns.iloc[(current_id - window_size):current_id, :].cov() * n_days 
     corr_matrix = log_returns.iloc[(current_id - window_size):current_id, :].corr()
 
     if implied_volatility:
@@ -154,11 +154,11 @@ def MultivariateGBMSimulationEMS(
                 else:
                     if isinstance(drift, np.ndarray):
                         result[k, i, j] = result[k, i, j-1] * np.exp(
-                            (drift[j] -  1/2 * np.sqrt(volatility.iloc[k, k])) * dt + 
+                            (drift[j] -  1/2 * volatility.iloc[k, k]) * dt + 
                             np.sqrt(dt) * choleskyMatrix[k, k] * e[k, j])
                     else:
                         result[k, i, j] = result[k, i, j-1] * np.exp(
-                            (drift -  1/2 * np.sqrt(volatility.iloc[k, k])) * dt + 
+                            (drift -  1/2 * volatility.iloc[k, k]) * dt + 
                             np.sqrt(dt) * choleskyMatrix[k, k] * e[k, j])
     for k in range(len(tickers)):  
             # path, step
@@ -180,7 +180,7 @@ def MultivariateGBMSimulationTS(
     implied_volatility=False
     ):
 
-    volatility=log_returns.iloc[(current_id - window_size):current_id, :].cov() * n_days   
+    volatility=log_returns.iloc[(current_id - window_size):current_id, :].cov() * n_days 
     corr_matrix = log_returns.iloc[(current_id - window_size):current_id, :].corr()
 
     T = dt * (last_id - current_id)
@@ -203,7 +203,7 @@ def MultivariateGBMSimulationTS(
         implied_vol = df_vol.iloc[(current_id - window_size):current_id, 1:]
         implied_vol = implied_vol.mean().values
         diag_matrix = np.diag(implied_vol)
-        volatility = diag_matrix @ corr_matrix @ diag_matrix
+        volatility = diag_matrix @ corr_matrix @ diag_matrix 
 
     for i in tqdm(range(n_paths)):
         choleskyMatrix = np.linalg.cholesky(volatility)
@@ -221,11 +221,11 @@ def MultivariateGBMSimulationTS(
                 else:
                     if isinstance(drift, np.ndarray):
                         result[k, i, j] = result[k, i, j-1] * drift[j] * np.exp(
-                            (- 1/2 * np.sqrt(volatility.iloc[k, k])) * dt + 
+                            (- 1/2 * volatility.iloc[k, k]) * dt + 
                             np.sqrt(dt) * choleskyMatrix[k, k] * e[k, j]) 
                     else:
                         result[k, i, j] = result[k, i, j-1] * drift * np.exp(
-                            (- 1/2 * np.sqrt(volatility.iloc[k, k])) * dt + 
+                            (- 1/2 * volatility.iloc[k, k]) * dt + 
                             np.sqrt(dt) * choleskyMatrix[k, k] * e[k, j])
     print(spline(T))
     return result, tickers, discounts
