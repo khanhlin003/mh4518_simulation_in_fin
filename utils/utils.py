@@ -2,6 +2,7 @@ import random
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+from sklearn.metrics import mean_squared_error
 
 def payoff_func(
         path_rog, 
@@ -137,7 +138,8 @@ def evaluation_plot(
     backtest_start,
     backtest_end,
     combined_df,
-    prices
+    prices,
+    ylim
 ):
     real_price = pd.read_csv('../data/product_price_full.csv')
     real_price['Date'] = pd.to_datetime(real_price['Date'], dayfirst=True)
@@ -147,18 +149,19 @@ def evaluation_plot(
     actual = real_price[(real_price['Date'] >= combined_df.iloc[backtest_start]['Date']) & (real_price['Date'] <= combined_df.iloc[backtest_end - 1]['Date'])]['Product'].values
     dates = real_price[(real_price['Date'] >= combined_df.iloc[backtest_start]['Date']) & (real_price['Date'] <= combined_df.iloc[backtest_end - 1]['Date'])]['Date']
 
-    real_price[(real_price['Date'] >= combined_df.iloc[backtest_start]['Date']) & (real_price['Date'] <= combined_df.iloc[backtest_end - 1]['Date'])]
+    # real_price[(real_price['Date'] >= combined_df.iloc[backtest_start]['Date']) & (real_price['Date'] <= combined_df.iloc[backtest_end - 1]['Date'])]
 
-    plt.figure(figsize=(20, 4))
+    plt.figure(figsize=(16, 4))
     for i in range(len(prices)):
+        print(mean_squared_error(prices[i], actual))
         plt.plot(dates, prices[i], marker='o', label=f'Predicted Prices {i}')
 
     plt.plot(dates, actual, marker='o', label='Actual Prices')
     plt.title('Price Comparison Over Time')
     plt.xlabel('Date')
     plt.ylabel('Price')
-    plt.ylim(850, 1150)
-    plt.legend()
+    plt.ylim(ylim[0], ylim[1])
+    # plt.legend()
     # plt.show()
 
 # payoff_func(
