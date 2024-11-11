@@ -49,6 +49,9 @@ def MultivariateGBMSimulation(
                 for k in range(len(tickers)):
                     if(j==0):
                         result[k, i, j] = s0[tickers[k]]
+
+
+
                     else:
                         if isinstance(drift, np.ndarray):
                             result[k, i, j] = result[k, i, j-1] * np.exp(
@@ -58,7 +61,6 @@ def MultivariateGBMSimulation(
                             result[k, i, j] = result[k, i, j-1] * np.exp(
                                 (drift -  1/2 * volatility.iloc[k, k]) * dt + 
                                 np.sqrt(dt) * choleskyMatrix[k, k] * e[k, j])
-    print('Hello')
     return result, tickers
 
 def MultivariateGBMSimulationAV(
