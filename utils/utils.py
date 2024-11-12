@@ -257,7 +257,7 @@ def evaluation_plot(
     plt.xlabel('Date')
     plt.ylabel('Price')
     plt.ylim(ylim[0], ylim[1])
-    # plt.legend()
+    plt.legend()
     # plt.show()
 
 # payoff_func(
