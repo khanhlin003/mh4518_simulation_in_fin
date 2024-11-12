@@ -177,13 +177,12 @@ def payoff_func_parallel(
 
     # # days_count = [element.days for element in (payment_dates - pd.to_datetime(start_date))]
     # # print(f'Payoff days: {days_count}')v
-
     indicator_vars = np.array((payment_dates >= pd.to_datetime(start_date)))
     payment_amount = np.array([1000 * coupon, 1000 * coupon, 1000 * coupon, 1000 * coupon, 1000 * coupon]) * indicator_vars
     if risk_neutral:    
-        total_payoff = np.sum(np.exp(-risk_free * days_count /252) * payment_amount * indicator_vars) + denomination_payoff
+        total_payoff = np.sum(np.exp(-risk_free[:-1] * days_count /252) * payment_amount * indicator_vars) + denomination_payoff * np.exp(-risk_free[-1] * days_count[-1] /252)
     else:
-        total_payoff = np.sum(payment_amount / risk_free * indicator_vars) + denomination_payoff
+        total_payoff = np.sum(payment_amount / risk_free[:-1] * indicator_vars) + denomination_payoff / risk_free[-1]
     return total_payoff
 
 def retrieve_data(

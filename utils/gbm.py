@@ -108,8 +108,8 @@ def MultivariateGBMSimulationAV(
         for k in range(len(tickers)):
             if(j==0):
                 if h==0:
-                    result[k, :, j] = s0[tickers[k]]
-                    result[k, n_paths - i - 1, j] = s0[tickers[k]]
+                    result[k, :n_paths//2, j] = s0[tickers[k]]
+                    result[k, n_paths//2:, j] = s0[tickers[k]]
                 else:
                     result[0, k, :, j] = s0[tickers[k]]
                     result[1, k, :, j] = s0[tickers[k]] * (1 + h)
@@ -226,7 +226,7 @@ def MultivariateGBMSimulationTS(
     np.random.seed(42)
 
     date_str = combined_df['Date'].iloc[current_id]
-    payment_dates = pd.to_datetime(['2023-12-11', '2024-03-11', '2024-06-11', '2024-09-11', '2024-12-11'])    
+    payment_dates = pd.to_datetime(['2023-12-11', '2024-03-11', '2024-06-11', '2024-09-11', '2024-12-11', '2024-12-11'])    
     days_count = [len(pd.bdate_range(start=pd.to_datetime(date_str), end=element)) for element in payment_dates]
 
     spline = interpolate_rate(df_bond, date_str)
