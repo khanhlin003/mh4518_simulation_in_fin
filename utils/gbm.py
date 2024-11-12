@@ -260,14 +260,14 @@ def MultivariateGBMSimulationTS(
                     result[1, k, :, j] = s0[tickers[k]] * (1 + h)
                     result[2, k, :, j] = s0[tickers[k]] * (1 - h)
             else:
-                d = drift_list[j] / 100
+                d = drift_list[j]
                 if h==0:
-                    result[k, :, j] = result[k, :, j-1] * np.exp(
-                        (d -  1/2 * volatility.iloc[k, k]) * dt + 
+                    result[k, :, j] = result[k, :, j-1] * d * np.exp(
+                        (- 1/2 * volatility.iloc[k, k]) * dt + 
                         np.sqrt(dt) * choleskyMatrix[k, k] * e[k, :, j]) 
                 else:
-                    result[:, k, :, j] = result[:, k, :, j-1] * np.exp(
-                        (d -  1/2 * volatility.iloc[k, k]) * dt + 
+                    result[:, k, :, j] = result[:, k, :, j-1] * d * np.exp(
+                        (-  1/2 * volatility.iloc[k, k]) * dt + 
                         np.sqrt(dt) * choleskyMatrix[k, k] * e[k, :, j])  
     return result, tickers, discounts
 
