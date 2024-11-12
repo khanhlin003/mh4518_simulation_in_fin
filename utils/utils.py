@@ -4,6 +4,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.metrics import mean_squared_error
 
+
 def payoff_func(
         path_rog, 
         path_cfr, 
@@ -87,6 +88,102 @@ def payoff_func(
         for amt, cnt, var, ir in zip(payment_amount, days_count, indicator_vars, risk_free):
             total_payoff +=  amt / ir * var
     # print(total_payoff)
+    return total_payoff
+
+def payoff_func_parallel(
+        path_rog, 
+        path_cfr, 
+        path_zurn,
+        start_date,
+        risk_free,
+        denomination=1000,
+        # coupon=0.0875, 
+        price_rog=257.65, 
+        price_cfr=125.60, 
+        price_zurn=412.30,
+        risk_neutral=True,
+        verbose=True
+        ):
+    
+    barrier_rog = price_rog * 0.6
+    barrier_cfr = price_cfr * 0.6
+    barrier_zurn = price_zurn * 0.6
+
+    path_rog = np.array(path_rog)
+    path_cfr = np.array(path_cfr)
+    path_zurn = np.array(path_zurn)
+
+
+
+    performance_rog = path_rog[:, -1] / price_rog
+    performance_cfr = path_cfr[:, -1] / price_cfr
+    performance_zurn = path_zurn[:, -1] / price_zurn
+
+    perf = np.vstack([performance_rog, performance_cfr, performance_zurn])
+    worst_performance = np.min(perf, axis=0)
+
+    if verbose:
+        print(f'Worst performance: {worst_performance}')
+
+
+
+    # for element in path_rog:
+    #     if element <= barrier_rog:
+    #         barrier = True
+    #         break
+
+    # for element in path_cfr:
+    #     if element <= barrier_cfr:
+    #         barrier = True
+    #         break
+
+    # for element in path_zurn:
+    #     if element <= barrier_zurn:
+    #         barrier = True
+    #         break
+
+    barrier = (np.sum(path_rog <= barrier_rog, axis=1) +  \
+               np.sum(path_cfr <= barrier_cfr, axis=1) + \
+               np.sum(path_zurn <= barrier_zurn, axis=1)) >= 1
+    
+
+     
+    if verbose:
+        print(f'Barrier event reached: {barrier}')
+    
+    # above_initial = int((path_rog[:, -1] >= price_rog)) + \
+    #                 int((path_cfr[:-1] >= price_cfr)) + \
+    #                 int((path_zurn[:, -1] >= price_zurn))
+    # if verbose:
+        # print(f'Close above initial: {above_initial}')
+
+
+
+    denomination_payoff = (denomination * worst_performance * barrier) + denomination * (1 - barrier)
+    # if (barrier==False) or (barrier==True and above_initial==3):
+    #     denomination_payoff = denomination  
+    # elif (barrier==True and above_initial<3):
+    #     denomination_payoff = denomination * worst_performance
+    # elif path_rog[-1]==0 or path_cfr[-1]==0 or path_zurn[-1]==0:
+    #     denomination_payoff = 0
+
+    # total_payoff = coupon_payoff + denomination_payoff
+    # denomination_payoff = 1000
+
+    coupon = 0.0175
+
+    payment_dates = pd.to_datetime(['2023-12-11', '2024-03-11', '2024-06-11', '2024-09-11', '2024-12-11'])
+    days_count = np.array([len(pd.bdate_range(start=start_date, end=element)) for element in payment_dates])
+
+    # # days_count = [element.days for element in (payment_dates - pd.to_datetime(start_date))]
+    # # print(f'Payoff days: {days_count}')v
+
+    indicator_vars = np.array((payment_dates >= pd.to_datetime(start_date)))
+    payment_amount = np.array([1000 * coupon, 1000 * coupon, 1000 * coupon, 1000 * coupon, 1000 * coupon]) * indicator_vars
+    if risk_neutral:    
+        total_payoff = np.sum(np.exp(-risk_free * days_count /252) * payment_amount * indicator_vars) + denomination_payoff
+    else:
+        total_payoff = np.sum(payment_amount / risk_free * indicator_vars) + denomination_payoff
     return total_payoff
 
 def retrieve_data(

@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from tqdm import tqdm
+from tqdm.auto import tqdm
 from utils import *
 from data_retrieve import *
 
@@ -24,7 +24,8 @@ def MultivariateGBMSimulation(
     last_id=287,
     current_id=187,
     window_size=30,
-    implied_volatility=False
+    implied_volatility=False,
+    h=0
 ):
     volatility=log_returns.iloc[(current_id - window_size):current_id, :].cov() * n_days 
     corr_matrix = log_returns.iloc[(current_id - window_size):current_id, :].corr()
@@ -38,27 +39,37 @@ def MultivariateGBMSimulation(
  
     T = dt * (last_id - current_id)
     n_steps = int(T / dt)
+
     result = np.zeros((len(tickers), n_paths, n_steps))
+    if h!=0:
+        result = np.zeros((3, len(tickers), n_paths, n_steps))
     np.random.seed(42)
+    choleskyMatrix = np.linalg.cholesky(volatility)
 
-    for i in tqdm(range(n_paths)):
-            choleskyMatrix = np.linalg.cholesky(volatility)
-            e = np.random.normal(size=(len(tickers), n_steps)) # Generate RV for steps
+    e = np.random.normal(size=(len(tickers), n_paths, n_steps)) # Generate RV for steps
 
-            for j in range(n_steps):
-                for k in range(len(tickers)):
-                    if(j==0):
-                        result[k, i, j] = s0[tickers[k]]
-
-                    else:
-                        if isinstance(drift, np.ndarray):
-                            result[k, i, j] = result[k, i, j-1] * np.exp(
-                                (drift[j] -  1/2 * volatility.iloc[k, k]) * dt + 
-                                np.sqrt(dt) * choleskyMatrix[k, k] * e[k, j]) 
-                        else:
-                            result[k, i, j] = result[k, i, j-1] * np.exp(
-                                (drift -  1/2 * volatility.iloc[k, k]) * dt + 
-                                np.sqrt(dt) * choleskyMatrix[k, k] * e[k, j])
+    for j in tqdm(range(n_steps)):
+        for k in range(len(tickers)):
+            if(j==0):
+                if h==0:
+                    result[k, :, j] = s0[tickers[k]]
+                else:
+                    result[0, k, :, j] = s0[tickers[k]]
+                    result[1, k, :, j] = s0[tickers[k]] * (1 + h)
+                    result[2, k, :, j] = s0[tickers[k]] * (1 - h)
+            else:
+                if isinstance(drift, np.ndarray):
+                    d = drift[j]
+                else:
+                    d = drift
+                if h==0:
+                    result[k, :, j] = result[k, :, j-1] * np.exp(
+                        (d -  1/2 * volatility.iloc[k, k]) * dt + 
+                        np.sqrt(dt) * choleskyMatrix[k, k] * e[k, :, j]) 
+                else:
+                    result[:, k, :, j] = result[:, k, :, j-1] * np.exp(
+                        (d -  1/2 * volatility.iloc[k, k]) * dt + 
+                        np.sqrt(dt) * choleskyMatrix[k, k] * e[k, :, j]) 
     return result, tickers
 
 def MultivariateGBMSimulationAV(
@@ -71,7 +82,8 @@ def MultivariateGBMSimulationAV(
     last_id=287,
     current_id=187,
     window_size=30,
-    implied_volatility=False
+    implied_volatility=False,
+    h=0
 ):
     volatility=log_returns.iloc[(current_id - window_size):current_id, :].cov() * n_days 
     corr_matrix = log_returns.iloc[(current_id - window_size):current_id, :].corr()
@@ -86,34 +98,44 @@ def MultivariateGBMSimulationAV(
     T = dt * (last_id - current_id)
     n_steps = int(T / dt)
     result = np.zeros((len(tickers), n_paths, n_steps))
+    if h!=0:
+        result = np.zeros((3, len(tickers), n_paths, n_steps))
     np.random.seed(42)
-
-    for i in tqdm(range(n_paths // 2)):
-        choleskyMatrix = np.linalg.cholesky(volatility)
-        e = np.random.normal(size=(len(tickers), n_steps)) # Generate RV for steps
-        e_tilde = -e    
-
-        for j in range(n_steps):
-            for k in range(len(tickers)):
-                if(j==0):
-                    result[k, i, j] = s0[tickers[k]]
+    choleskyMatrix = np.linalg.cholesky(volatility)
+    e = np.random.normal(size=(len(tickers), n_paths//2, n_steps)) # Generate RV for steps
+    e_tilde = -e
+    for j in tqdm(range(n_steps)):
+        for k in range(len(tickers)):
+            if(j==0):
+                if h==0:
+                    result[k, :, j] = s0[tickers[k]]
                     result[k, n_paths - i - 1, j] = s0[tickers[k]]
-
                 else:
-                    if isinstance(drift, np.ndarray):
-                        result[k, i, j] = result[k, i, j-1] * np.exp(
-                            (drift[j] -  1/2 * volatility.iloc[k, k]) * dt + 
-                            np.sqrt(dt) * choleskyMatrix[k, k] * e[k, j])
-                        result[k, n_paths - i - 1, j] = result[k, n_paths - i - 1, j-1] * np.exp(
-                            (drift[j] -  1/2 * volatility.iloc[k, k]) * dt + 
-                            np.sqrt(dt) * choleskyMatrix[k, k] * e_tilde[k, j])
-                    else:
-                        result[k, i, j] = result[k, i, j-1] * np.exp(
-                            (drift -  1/2 * volatility.iloc[k, k]) * dt + 
-                            np.sqrt(dt) * choleskyMatrix[k, k] * e[k, j])
-                        result[k, n_paths - i - 1, j] = result[k, n_paths - i - 1, j-1] * np.exp(
-                            (drift -  1/2 * volatility.iloc[k, k]) * dt + 
-                            np.sqrt(dt) * choleskyMatrix[k, k] * e_tilde[k, j])
+                    result[0, k, :, j] = s0[tickers[k]]
+                    result[1, k, :, j] = s0[tickers[k]] * (1 + h)
+                    result[2, k, :, j] = s0[tickers[k]] * (1 - h)
+
+            else:
+                if isinstance(drift, np.ndarray):
+                    d = drift[j]
+                else:
+                    d = drift
+
+                if h==0:
+                    result[k, :n_paths//2, j] = result[k, :n_paths//2, j-1] * np.exp(
+                        (d -  1/2 * volatility.iloc[k, k]) * dt + 
+                        np.sqrt(dt) * choleskyMatrix[k, k] * e[k, :, j]) 
+                    result[k, n_paths//2:, j] = result[k, n_paths//2:, j-1] * np.exp(
+                        (d -  1/2 * volatility.iloc[k, k]) * dt + 
+                        np.sqrt(dt) * choleskyMatrix[k, k] * e_tilde[k, :, j]) 
+                else:
+                    result[:, k, :n_paths//2, j] = result[:, k, :n_paths//2, j-1] * np.exp(
+                        (d -  1/2 * volatility.iloc[k, k]) * dt + 
+                        np.sqrt(dt) * choleskyMatrix[k, k] * e[k, :, j]) 
+                    result[:, k, n_paths//2:, j] = result[:, k, n_paths//2:, j-1] * np.exp(
+                        (d -  1/2 * volatility.iloc[k, k]) * dt + 
+                        np.sqrt(dt) * choleskyMatrix[k, k] * e_tilde[k, :, j]) 
+
     return result, tickers
 
 def MultivariateGBMSimulationEMS(
@@ -126,7 +148,8 @@ def MultivariateGBMSimulationEMS(
     last_id=287,
     current_id=187,
     window_size=30,
-    implied_volatility=False
+    implied_volatility=False,
+    h=0
 ):
     volatility=log_returns.iloc[(current_id - window_size):current_id, :].cov() * n_days 
     corr_matrix = log_returns.iloc[(current_id - window_size):current_id, :].corr()
@@ -141,29 +164,38 @@ def MultivariateGBMSimulationEMS(
     T = dt * (last_id - current_id)
     n_steps = int(T / dt)
     result = np.zeros((len(tickers), n_paths, n_steps))
+    if h!=0:
+        result = np.zeros((3, len(tickers), n_paths, n_steps))
     np.random.seed(42)
+    choleskyMatrix = np.linalg.cholesky(volatility)
+    e = np.random.normal(size=(len(tickers), n_paths, n_steps)) # Generate RV for steps
 
-    for i in tqdm(range(n_paths)):
-        choleskyMatrix = np.linalg.cholesky(volatility)
-        e = np.random.normal(size=(len(tickers), n_steps)) # Generate RV for steps
-
-        for j in range(n_steps):
-            for k in range(len(tickers)):
-                if(j==0):
-                    result[k, i, j] = s0[tickers[k]]
+    for j in tqdm(range(n_steps)):
+        for k in range(len(tickers)):
+            if(j==0):
+                if h==0:
+                    result[k, :, j] = s0[tickers[k]]
                 else:
-                    if isinstance(drift, np.ndarray):
-                        result[k, i, j] = result[k, i, j-1] * np.exp(
-                            (drift[j] -  1/2 * volatility.iloc[k, k]) * dt + 
-                            np.sqrt(dt) * choleskyMatrix[k, k] * e[k, j])
-                    else:
-                        result[k, i, j] = result[k, i, j-1] * np.exp(
-                            (drift -  1/2 * volatility.iloc[k, k]) * dt + 
-                            np.sqrt(dt) * choleskyMatrix[k, k] * e[k, j])
+                    result[0, k, :, j] = s0[tickers[k]]
+                    result[1, k, :, j] = s0[tickers[k]] * (1 + h)
+                    result[2, k, :, j] = s0[tickers[k]] * (1 - h)
+            else:
+                if isinstance(drift, np.ndarray):
+                    d = drift[j]
+                else:
+                    d = drift
+                if h==0:
+                    result[k, :, j] = result[k, :, j-1] * np.exp(
+                        (d -  1/2 * volatility.iloc[k, k]) * dt + 
+                        np.sqrt(dt) * choleskyMatrix[k, k] * e[k, :, j]) 
+                else:
+                    result[:, k, :, j] = result[:, k, :, j-1] * np.exp(
+                        (d -  1/2 * volatility.iloc[k, k]) * dt + 
+                        np.sqrt(dt) * choleskyMatrix[k, k] * e[k, :, j]) 
     for k in range(len(tickers)):  
             # path, step
-        correction_factor = result[k][-1, :].mean() / result[k][-1, :] 
-        result[k] = result[k] * correction_factor 
+        correction_factor = result[:, k, -1, :].mean() / result[:, k, -1, :]
+        result[:, k, :, :] = result[:, k, :, :] * correction_factor 
     
     return result, tickers
 
@@ -177,7 +209,8 @@ def MultivariateGBMSimulationTS(
     last_id=287,
     current_id=187,
     window_size=30,
-    implied_volatility=False
+    implied_volatility=False,
+    h=0
     ):
 
     volatility=log_returns.iloc[(current_id - window_size):current_id, :].cov() * n_days 
@@ -188,10 +221,12 @@ def MultivariateGBMSimulationTS(
 
     n_steps = int(T / dt)
     result = np.zeros((len(tickers), n_paths, n_steps))
+    if h!=0:
+        result = np.zeros((3, len(tickers), n_paths, n_steps))
     np.random.seed(42)
 
     date_str = combined_df['Date'].iloc[current_id]
-    payment_dates = pd.to_datetime(['2023-12-11', '2024-03-11', '2024-06-11', '2024-09-11', '2024-12-11', '2024-12-11'])    
+    payment_dates = pd.to_datetime(['2023-12-11', '2024-03-11', '2024-06-11', '2024-09-11', '2024-12-11'])    
     days_count = [len(pd.bdate_range(start=pd.to_datetime(date_str), end=element)) for element in payment_dates]
 
     spline = interpolate_rate(df_bond, date_str)
@@ -205,28 +240,35 @@ def MultivariateGBMSimulationTS(
         diag_matrix = np.diag(implied_vol)
         volatility = diag_matrix @ corr_matrix @ diag_matrix 
 
-    for i in tqdm(range(n_paths)):
-        choleskyMatrix = np.linalg.cholesky(volatility)
-        e = np.random.normal(size=(len(tickers), n_steps)) # Generate RV for steps
+    choleskyMatrix = np.linalg.cholesky(volatility)
 
-        drift_list = []
-        for j in range(n_steps):
-            # print(spline(0))
-            drift = spline(j/252) / spline((j+1)/252) 
-            drift_list.append(drift)
+    drift_list = []
+    for j in range(n_steps):
+        # print(spline(0))
+        drift = spline(j/252) / spline((j+1)/252) 
+        drift_list.append(drift)
+    
+    e = np.random.normal(size=(len(tickers), n_paths, n_steps)) # Generate RV for steps
 
-            for k in range(len(tickers)):
-                if(j==0):
-                    result[k, i, j] = s0[tickers[k]]
+    for j in tqdm(range(n_steps)):
+        for k in range(len(tickers)):
+            if(j==0):
+                if h==0:
+                    result[k, :, j] = s0[tickers[k]]
                 else:
-                    if isinstance(drift, np.ndarray):
-                        result[k, i, j] = result[k, i, j-1] * drift[j] * np.exp(
-                            (- 1/2 * volatility.iloc[k, k]) * dt + 
-                            np.sqrt(dt) * choleskyMatrix[k, k] * e[k, j]) 
-                    else:
-                        result[k, i, j] = result[k, i, j-1] * drift * np.exp(
-                            (- 1/2 * volatility.iloc[k, k]) * dt + 
-                            np.sqrt(dt) * choleskyMatrix[k, k] * e[k, j])
+                    result[0, k, :, j] = s0[tickers[k]]
+                    result[1, k, :, j] = s0[tickers[k]] * (1 + h)
+                    result[2, k, :, j] = s0[tickers[k]] * (1 - h)
+            else:
+                d = drift_list[j] / 100
+                if h==0:
+                    result[k, :, j] = result[k, :, j-1] * np.exp(
+                        (d -  1/2 * volatility.iloc[k, k]) * dt + 
+                        np.sqrt(dt) * choleskyMatrix[k, k] * e[k, :, j]) 
+                else:
+                    result[:, k, :, j] = result[:, k, :, j-1] * np.exp(
+                        (d -  1/2 * volatility.iloc[k, k]) * dt + 
+                        np.sqrt(dt) * choleskyMatrix[k, k] * e[k, :, j])  
     return result, tickers, discounts
 
 # MultivariateGBMSimulationTS(s0=close.iloc[187], n_paths=100, current_id=187, window_size=30)
