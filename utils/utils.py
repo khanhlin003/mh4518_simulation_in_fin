@@ -158,8 +158,9 @@ def payoff_func_parallel(
         # print(f'Close above initial: {above_initial}')
 
 
+    # above_initial = int(path_rog[:, -1] >= price_rog) + int(path_cfr[:, -1] >= price_cfr) + int(path_zurn[:, -1] >= price_zurn)
 
-    denomination_payoff = (denomination * worst_performance * barrier) + denomination * (1 - barrier)
+    denomination_payoff = (denomination * worst_performance * barrier) + denomination * (1 - barrier) 
     # if (barrier==False) or (barrier==True and above_initial==3):
     #     denomination_payoff = denomination  
     # elif (barrier==True and above_initial<3):
