@@ -19,7 +19,7 @@ def MultivariateGBMSimulation(
     tickers=tickers,
     dt=dt,
     log_returns=log_returns,
-    drift=0.01,
+    drift=0.01107,
     n_paths=100,
     last_id=287,
     current_id=187,
@@ -72,7 +72,7 @@ def MultivariateGBMSimulation(
                         np.sqrt(dt) * choleskyMatrix[k, k] * e[k, :, j]) 
     
     discount = drift
-    
+
     return result, tickers, discount
 
 def MultivariateGBMSimulationAV(
@@ -80,7 +80,7 @@ def MultivariateGBMSimulationAV(
     tickers=tickers,
     dt=dt,
     log_returns=log_returns,
-    drift=0.01,
+    drift=0.01107,
     n_paths=100,
     last_id=287,
     current_id=187,
@@ -148,7 +148,7 @@ def MultivariateGBMSimulationEMS(
     tickers=tickers,
     dt=dt,
     log_returns=log_returns,
-    drift=0.01,
+    drift=0.01107,
     n_paths=100,
     last_id=287,
     current_id=187,
@@ -211,7 +211,7 @@ def MultivariateGBMSimulationTS(
     tickers=tickers,
     dt=dt,
     log_returns=log_returns,
-    drift=0.01,
+    drift=0.01107,
     n_paths=100,
     last_id=287,
     current_id=187,
