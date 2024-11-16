@@ -249,10 +249,10 @@ def evaluation_plot(
 
     plt.figure(figsize=(16, 4))
     for i in range(len(prices)):
-        print(mean_squared_error(prices[i], actual))
+        print(mean_squared_error(prices[i], actual) ** 0.5)
         plt.plot(dates, prices[i], label=f'Predicted Prices {i}')
 
-    plt.plot(dates, actual, label='Actual Prices', color='red')
+    plt.plot(dates, actual, label='Actual Prices')
     plt.title('Price Comparison Over Time')
     plt.xlabel('Date')
     plt.ylabel('Price')
