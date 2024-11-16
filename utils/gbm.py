@@ -19,7 +19,7 @@ def MultivariateGBMSimulation(
     tickers=tickers,
     dt=dt,
     log_returns=log_returns,
-    drift=0.01,
+    drift=0.01107,
     n_paths=100,
     last_id=287,
     current_id=187,
@@ -70,14 +70,17 @@ def MultivariateGBMSimulation(
                     result[:, k, :, j] = result[:, k, :, j-1] * np.exp(
                         (d -  1/2 * volatility.iloc[k, k]) * dt + 
                         np.sqrt(dt) * choleskyMatrix[k, k] * e[k, :, j]) 
-    return result, tickers
+    
+    discount = drift
+
+    return result, tickers, discount
 
 def MultivariateGBMSimulationAV(
     s0, 
     tickers=tickers,
     dt=dt,
     log_returns=log_returns,
-    drift=0.01,
+    drift=0.01107,
     n_paths=100,
     last_id=287,
     current_id=187,
@@ -135,15 +138,17 @@ def MultivariateGBMSimulationAV(
                     result[:, k, n_paths//2:, j] = result[:, k, n_paths//2:, j-1] * np.exp(
                         (d -  1/2 * volatility.iloc[k, k]) * dt + 
                         np.sqrt(dt) * choleskyMatrix[k, k] * e_tilde[k, :, j]) 
+    
+    discount = drift
 
-    return result, tickers
+    return result, tickers, discount
 
 def MultivariateGBMSimulationEMS(
     s0, 
     tickers=tickers,
     dt=dt,
     log_returns=log_returns,
-    drift=0.01,
+    drift=0.01107,
     n_paths=100,
     last_id=287,
     current_id=187,
@@ -196,15 +201,17 @@ def MultivariateGBMSimulationEMS(
             # path, step
         correction_factor = result[:, k, -1, :].mean() / result[:, k, -1, :]
         result[:, k, :, :] = result[:, k, :, :] * correction_factor 
+
+    discount = drift
     
-    return result, tickers
+    return result, tickers, discount
 
 def MultivariateGBMSimulationTS(
     s0, 
     tickers=tickers,
     dt=dt,
     log_returns=log_returns,
-    drift=0.01,
+    drift=0.01107,
     n_paths=100,
     last_id=287,
     current_id=187,
